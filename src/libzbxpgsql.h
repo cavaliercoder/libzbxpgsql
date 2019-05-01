@@ -49,6 +49,23 @@
 #define zbx_snprintf pgsql_snprintf /* prevent symbol conflict with zbx_snprintf() function in new Zabbix binaries */
 extern size_t (*zbx_snprintf)(char *str, size_t count, const char *fmt, ...); /* use old name to avoid changing much of our code */
 #include <log.h>
+/* zabbix_log() macro has always been a wrapper of __zbx_zabbix_log() function which used to perform log level check, it's not guaranteed now */
+#undef zabbix_log /* it's time to stop using zabbix_log() provided by Zabbix and define our own */
+extern int (*real_zabbix_check_log_level)(int level);
+extern int *real_zbx_log_level;
+extern void (*real_zabbix_log)(int level, const char *fmt, ...);
+#define zabbix_log(level, ...) \
+do \
+{ \
+    if (NULL != real_zabbix_check_log_level && SUCCEED != real_zabbix_check_log_level(level)) \
+        break; \
+\
+    if (NULL != real_zbx_log_level && LOG_LEVEL_INFORMATION != level && (level > *real_zbx_log_level || LOG_LEVEL_EMPTY == level)) \
+        break; \
+\
+    real_zabbix_log(level, __VA_ARGS__); \
+} \
+while(0)
 #include <zbxjson.h>
 #include <version.h>
 

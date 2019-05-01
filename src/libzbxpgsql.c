@@ -29,6 +29,10 @@
 
 size_t (*zbx_snprintf)(char *str, size_t count, const char *fmt, ...) = NULL;
 
+int (*real_zabbix_check_log_level)(int level) = NULL;
+int *real_zbx_log_level = NULL;
+void (*real_zabbix_log)(int level, const char *fmt, ...) = NULL;
+
 // Define custom keys
 static ZBX_METRIC keys[] =
 /*      KEY                         FLAG            FUNCTION                        TEST PARAMETERS */
@@ -186,11 +190,27 @@ int  zbx_module_uninit() {
 int  zbx_module_init() {
     void *handle;
 
-    zabbix_log(LOG_LEVEL_INFORMATION, "starting agent module %s", PACKAGE_STRING);
+    printf("starting agent module %s", PACKAGE_STRING);
 
     if (NULL == (handle = dlopen(NULL, RTLD_LAZY | RTLD_NOLOAD)))
     {
-        zabbix_log(LOG_LEVEL_ERR, "failed to dlopen() Zabbix binary: %s", dlerror());
+        fprintf(stderr, "failed to dlopen() Zabbix binary: %s", dlerror());
+        return ZBX_MODULE_FAIL;
+    }
+
+    real_zabbix_check_log_level = dlsym(handle, "zabbix_check_log_level"); /* was available before ZBX-10889 */
+    real_zbx_log_level = dlsym(handle, "zbx_log_level"); /* is available since ZBX-10889 */
+
+    if (NULL == real_zabbix_check_log_level && NULL == real_zbx_log_level)
+    {
+        fprintf(stderr, "failed to find both zabbix_check_log_level() and zbx_log_level,"
+                " be aware that module may spam with log messages");
+        /* not a critical error, we can continue */
+    }
+
+    if (NULL == (real_zabbix_log = dlsym(handle, "__zbx_zabbix_log")))
+    {
+        fprintf(stderr, "failed to find __zbx_zabbix_log(): %s", dlerror());
         return ZBX_MODULE_FAIL;
     }
 
