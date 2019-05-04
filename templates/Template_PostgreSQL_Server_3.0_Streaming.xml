@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<zabbix_export>
+    <version>3.4</version>
+    <date>2018-05-15T08:47:55Z</date>
+    <groups>
+        <group>
+            <name>Templates</name>
+        </group>
+    </groups>
+    <templates>
+        <template>
+            <template>Template App PostgreSQL Streaming</template>
+            <name>Template App PostgreSQL Streaming</name>
+            <description>This template is used to monitor streaming replication on master and slave PostgreSQL clusters.&#13;
+&#13;
+Requirements:&#13;
+===========&#13;
+libzbxpgsql v1.1+ module&#13;
+Template App PostgreSQL (supplied with libzbxpgsql)&#13;
+streaming.conf file&#13;
+zabbix agent connecting to db as super-user&#13;
+&#13;
+Installation:&#13;
+- libzbxpgsql v1.1 (or higher) installed and configured&#13;
+- copy the streaming.conf file to /etc/zabbix directory&#13;
+- modify the /etc/zabbix/libzbxpgsql.conf file to include streaming.conf:&#13;
+#-----------------------------------------------&#13;
+queries = {&#13;
+@include &quot;/etc/libzbxpgsql.d/streaming.conf&quot;&#13;
+}&#13;
+#-----------------------------------------------&#13;
+- restart the zabbix agent&#13;
+- import the &quot;Template App PostgreSQL Streaming&quot; template into Zabbix&#13;
+- link the template to your db hosts&#13;
+&#13;
+Notes:&#13;
+=====&#13;
+The template included with libzbxpgsql, &quot;Template App PostgreSQL&quot;, must be linked to the host and properly configured before linking this streaming template to the host.&#13;
+&#13;
+Trigger thresholds can be managed in the host macros.</description>
+            <groups>
+                <group>
+                    <name>Templates</name>
+                </group>
+            </groups>
+            <applications>
+                <application>
+                    <name>PostgreSQL Streaming Replication</name>
+                </application>
+            </applications>
+            <items>
+                <item>
+                    <name>PostgreSQL Streaming Replication Master Log Pump</name>
+                    <type>7</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>pg.query.string[{$PG_CONN},{$PG_DB},replpump]</key>
+                    <delay>30</delay>
+                    <history>7d</history>
+                    <trends>0</trends>
+                    <status>0</status>
+                    <value_type>4</value_type>
+                    <allowed_hosts/>
+                    <units/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <description>This executes function replication_pump() which issues a bogus NOTIFY command in PostgreSQL on a master with at least one slave. It doesn't really notify anything (because there are no listeners), but it does cause the pg_last_xact_replay_timestamp() to be updated on all slaves as a side effect.&#13;
+&#13;
+If you have a system that is busy 24x7 then this is not necessary.</description>
+                    <inventory_link>0</inventory_link>
+                    <applications>
+                        <application>
+                            <name>PostgreSQL Streaming Replication</name>
+                        </application>
+                    </applications>
+                    <valuemap/>
+                    <logtimefmt/>
+                    <preprocessing/>
+                    <jmx_endpoint/>
+                    <master_item/>
+                </item>
+            </items>
+            <discovery_rules>
+                <discovery_rule>
+                    <name>PostgreSQL Streaming Master Discovery</name>
+                    <type>7</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>pg.query.discovery[{$PG_CONN},{$PG_DB},dscrepmstr]</key>
+                    <delay>600</delay>
+                    <status>0</status>
+                    <allowed_hosts/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <filter>
+                        <evaltype>0</evaltype>
+                        <formula/>
+                        <conditions/>
+                    </filter>
+                    <lifetime>30d</lifetime>
+                    <description>Discover a master with connected streaming slaves.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>PostgreSQL Streaming Slave {#PGSLAVE} Lag Bytes</name>
+                            <type>7</type>
+                            <snmp_community/>
+                            <snmp_oid/>
+                            <key>pg.query.integer[{$PG_CONN},{$PG_DB},repllagbytes,{#PGSLAVEIP}]</key>
+                            <delay>60</delay>
+                            <history>30d</history>
+                            <trends>400d</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units>B</units>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description>The number of log bytes that a streaming slave is behind its master.  This metric is measured on the master.</description>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>PostgreSQL Streaming Replication</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                            <logtimefmt/>
+                            <preprocessing/>
+                            <jmx_endpoint/>
+                            <application_prototypes/>
+                            <master_item_prototype/>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template App PostgreSQL Streaming:pg.query.integer[{$PG_CONN},{$PG_DB},repllagbytes,{#PGSLAVEIP}].last()}&gt;{$PG_ALRT_SLAVE_LAG_BYTES}</expression>
+                            <recovery_mode>0</recovery_mode>
+                            <recovery_expression/>
+                            <name>PostgreSQL Streaming Replication lag bytes high on slave {#PGSLAVE}</name>
+                            <correlation_mode>0</correlation_mode>
+                            <correlation_tag/>
+                            <url/>
+                            <status>0</status>
+                            <priority>3</priority>
+                            <description/>
+                            <type>0</type>
+                            <manual_close>0</manual_close>
+                            <dependencies/>
+                            <tags/>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>PostgreSQL Streaming Slave &quot;{#PGSLAVE}&quot; Lag Bytes</name>
+                            <width>900</width>
+                            <height>200</height>
+                            <yaxismin>0.0000</yaxismin>
+                            <yaxismax>100.0000</yaxismax>
+                            <show_work_period>1</show_work_period>
+                            <show_triggers>1</show_triggers>
+                            <type>0</type>
+                            <show_legend>1</show_legend>
+                            <show_3d>0</show_3d>
+                            <percent_left>0.0000</percent_left>
+                            <percent_right>0.0000</percent_right>
+                            <ymin_type_1>1</ymin_type_1>
+                            <ymax_type_1>0</ymax_type_1>
+                            <ymin_item_1>0</ymin_item_1>
+                            <ymax_item_1>0</ymax_item_1>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>0</sortorder>
+                                    <drawtype>5</drawtype>
+                                    <color>BA4A00</color>
+                                    <yaxisside>1</yaxisside>
+                                    <calc_fnc>4</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App PostgreSQL Streaming</host>
+                                        <key>pg.query.integer[{$PG_CONN},{$PG_DB},repllagbytes,{#PGSLAVEIP}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <host_prototypes/>
+                    <jmx_endpoint/>
+                </discovery_rule>
+                <discovery_rule>
+                    <name>PostgreSQL Streaming Slave Discovery</name>
+                    <type>7</type>
+                    <snmp_community/>
+                    <snmp_oid/>
+                    <key>pg.query.discovery[{$PG_CONN},{$PG_DB},dscrepslave]</key>
+                    <delay>600</delay>
+                    <status>0</status>
+                    <allowed_hosts/>
+                    <snmpv3_contextname/>
+                    <snmpv3_securityname/>
+                    <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                    <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                    <snmpv3_authpassphrase/>
+                    <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                    <snmpv3_privpassphrase/>
+                    <params/>
+                    <ipmi_sensor/>
+                    <authtype>0</authtype>
+                    <username/>
+                    <password/>
+                    <publickey/>
+                    <privatekey/>
+                    <port/>
+                    <filter>
+                        <evaltype>0</evaltype>
+                        <formula/>
+                        <conditions/>
+                    </filter>
+                    <lifetime>30d</lifetime>
+                    <description>Discover a connected streaming slave.</description>
+                    <item_prototypes>
+                        <item_prototype>
+                            <name>PostgreSQL Streaming {#PGSLV} Lag Seconds</name>
+                            <type>7</type>
+                            <snmp_community/>
+                            <snmp_oid/>
+                            <key>pg.query.integer[{$PG_CONN},{$PG_DB},{#PGSLVLAG}]</key>
+                            <delay>60</delay>
+                            <history>90d</history>
+                            <trends>365d</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units>s</units>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description>The number of seconds that a slave is behind the master in streaming replication.</description>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>PostgreSQL Streaming Replication</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                            <logtimefmt/>
+                            <preprocessing/>
+                            <jmx_endpoint/>
+                            <application_prototypes/>
+                            <master_item_prototype/>
+                        </item_prototype>
+                        <item_prototype>
+                            <name>PostgreSQL Streaming {#PGSLV} Repl Paused</name>
+                            <type>7</type>
+                            <snmp_community/>
+                            <snmp_oid/>
+                            <key>pg.query.integer[{$PG_CONN},{$PG_DB},{#PGSLVPAUSED}]</key>
+                            <delay>60</delay>
+                            <history>90d</history>
+                            <trends>365d</trends>
+                            <status>0</status>
+                            <value_type>3</value_type>
+                            <allowed_hosts/>
+                            <units/>
+                            <snmpv3_contextname/>
+                            <snmpv3_securityname/>
+                            <snmpv3_securitylevel>0</snmpv3_securitylevel>
+                            <snmpv3_authprotocol>0</snmpv3_authprotocol>
+                            <snmpv3_authpassphrase/>
+                            <snmpv3_privprotocol>0</snmpv3_privprotocol>
+                            <snmpv3_privpassphrase/>
+                            <params/>
+                            <ipmi_sensor/>
+                            <authtype>0</authtype>
+                            <username/>
+                            <password/>
+                            <publickey/>
+                            <privatekey/>
+                            <port/>
+                            <description>Returns a 1 if streaming replication is paused on the slave, 0 if not paused.&#13;
+&#13;
+select pg_xlog_replay_pause(); -- pauses replication on slave&#13;
+select pg_xlog_replay_resume(); -- resumes replication on slave&#13;
+select pg_is_xlog_replay_paused(); -- true if paused, false if not paused</description>
+                            <inventory_link>0</inventory_link>
+                            <applications>
+                                <application>
+                                    <name>PostgreSQL Streaming Replication</name>
+                                </application>
+                            </applications>
+                            <valuemap/>
+                            <logtimefmt/>
+                            <preprocessing/>
+                            <jmx_endpoint/>
+                            <application_prototypes/>
+                            <master_item_prototype/>
+                        </item_prototype>
+                    </item_prototypes>
+                    <trigger_prototypes>
+                        <trigger_prototype>
+                            <expression>{Template App PostgreSQL Streaming:pg.query.integer[{$PG_CONN},{$PG_DB},{#PGSLVLAG}].last()}&gt;{$PG_ALRT_SLAVE_LAG_SECS}</expression>
+                            <recovery_mode>0</recovery_mode>
+                            <recovery_expression/>
+                            <name>PostgreSQL Streaming Replication is behind on slave {HOST.NAME1}</name>
+                            <correlation_mode>0</correlation_mode>
+                            <correlation_tag/>
+                            <url/>
+                            <status>0</status>
+                            <priority>3</priority>
+                            <description>PostgreSQL Streaming Replication on this host is behind the master by at least {$PG_ALRT_SLAVE_LAG_SECS} seconds.&#13;
+&#13;
+Measured by:  &#13;
+select case when pg_is_in_recovery() = TRUE &#13;
+                   then extract(epoch from now() - pg_last_xact_replay_timestamp())::int &#13;
+                   else 0::int &#13;
+                 end;</description>
+                            <type>0</type>
+                            <manual_close>0</manual_close>
+                            <dependencies/>
+                            <tags/>
+                        </trigger_prototype>
+                        <trigger_prototype>
+                            <expression>{Template App PostgreSQL Streaming:pg.query.integer[{$PG_CONN},{$PG_DB},{#PGSLVPAUSED}].last()}=1</expression>
+                            <recovery_mode>0</recovery_mode>
+                            <recovery_expression/>
+                            <name>PostgreSQL Streaming Replication is paused on slave {HOST.NAME1}</name>
+                            <correlation_mode>0</correlation_mode>
+                            <correlation_tag/>
+                            <url/>
+                            <status>0</status>
+                            <priority>2</priority>
+                            <description>Streaming replication has been paused by administrator (select pg_xlog_replay_pause();).&#13;
+&#13;
+Determined by:&#13;
+select pg_is_xlog_replay_paused();&#13;
+&#13;
+It can be re-enabled by an administrator by executing &quot;select pg_xlog_replay_resume();&quot; on the slave.</description>
+                            <type>0</type>
+                            <manual_close>0</manual_close>
+                            <dependencies/>
+                            <tags/>
+                        </trigger_prototype>
+                    </trigger_prototypes>
+                    <graph_prototypes>
+                        <graph_prototype>
+                            <name>PostgreSQL {#PGSLV} Replication Lag Seconds</name>
+                            <width>900</width>
+                            <height>200</height>
+                            <yaxismin>0.0000</yaxismin>
+                            <yaxismax>100.0000</yaxismax>
+                            <show_work_period>1</show_work_period>
+                            <show_triggers>1</show_triggers>
+                            <type>0</type>
+                            <show_legend>1</show_legend>
+                            <show_3d>0</show_3d>
+                            <percent_left>0.0000</percent_left>
+                            <percent_right>0.0000</percent_right>
+                            <ymin_type_1>1</ymin_type_1>
+                            <ymax_type_1>0</ymax_type_1>
+                            <ymin_item_1>0</ymin_item_1>
+                            <ymax_item_1>0</ymax_item_1>
+                            <graph_items>
+                                <graph_item>
+                                    <sortorder>0</sortorder>
+                                    <drawtype>5</drawtype>
+                                    <color>F63100</color>
+                                    <yaxisside>1</yaxisside>
+                                    <calc_fnc>4</calc_fnc>
+                                    <type>0</type>
+                                    <item>
+                                        <host>Template App PostgreSQL Streaming</host>
+                                        <key>pg.query.integer[{$PG_CONN},{$PG_DB},{#PGSLVLAG}]</key>
+                                    </item>
+                                </graph_item>
+                            </graph_items>
+                        </graph_prototype>
+                    </graph_prototypes>
+                    <host_prototypes/>
+                    <jmx_endpoint/>
+                </discovery_rule>
+            </discovery_rules>
+            <httptests/>
+            <macros>
+                <macro>
+                    <macro>{$PG_ALRT_SLAVE_LAG_BYTES}</macro>
+                    <value>104857600</value>
+                </macro>
+                <macro>
+                    <macro>{$PG_ALRT_SLAVE_LAG_SECS}</macro>
+                    <value>300</value>
+                </macro>
+            </macros>
+            <templates/>
+            <screens>
+                <screen>
+                    <name>PostgreSQL Streaming Replication Stats</name>
+                    <hsize>1</hsize>
+                    <vsize>2</vsize>
+                    <screen_items>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>0</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>PostgreSQL {#PGSLV} Replication Lag Seconds</name>
+                                <host>Template App PostgreSQL Streaming</host>
+                            </resource>
+                            <max_columns>6</max_columns>
+                            <application/>
+                        </screen_item>
+                        <screen_item>
+                            <resourcetype>20</resourcetype>
+                            <width>500</width>
+                            <height>100</height>
+                            <x>0</x>
+                            <y>1</y>
+                            <colspan>1</colspan>
+                            <rowspan>1</rowspan>
+                            <elements>0</elements>
+                            <valign>0</valign>
+                            <halign>0</halign>
+                            <style>0</style>
+                            <url/>
+                            <dynamic>0</dynamic>
+                            <sort_triggers>0</sort_triggers>
+                            <resource>
+                                <name>PostgreSQL Streaming Slave &quot;{#PGSLAVE}&quot; Lag Bytes</name>
+                                <host>Template App PostgreSQL Streaming</host>
+                            </resource>
+                            <max_columns>3</max_columns>
+                            <application/>
+                        </screen_item>
+                    </screen_items>
+                </screen>
+            </screens>
+        </template>
+    </templates>
+</zabbix_export>
