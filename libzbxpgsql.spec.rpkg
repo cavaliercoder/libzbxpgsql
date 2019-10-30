@@ -1,0 +1,69 @@
+%define     main_version  4.0
+%define     minor_version 12
+%define     module_dir    src/modules
+
+Name:       {{{ git_dir_name }}}
+Version:    {{{ git_tag_last }}}
+Release:    {{{ git_commits_since_last_tag_add1 }}}%{?dist}
+Summary:    PostgreSQL monitoring module for Zabbix
+
+Group:      Applications/Internet
+License:    GPLv2
+URL: 		https://github.com/cavaliercoder/libzbxpgsql
+VCS:        {{{ git_dir_vcs }}}
+
+Source:     {{{ git_dir_pack }}}
+
+Requires:   zabbix-agent >= 4.0.0, zabbix-agent < 4.1.0
+# minimum libpq version based on latest patch of RHEL 5
+Requires    : postgresql-libs >= 8.1.23
+
+BuildRequires: systemd, gcc, libtool, libconfig-devel, postgresql-devel
+Requires(post):  systemd
+Requires(preun): systemd
+
+%description
+libzbxpgsql is a comprehensive PostgreSQL discovery and monitoring module for the Zabbix monitoring agent written in C.
+
+%global debug_package %{nil}
+
+%prep
+{{{ git_dir_setup_macro }}}
+curl -o /tmp/zbx.rpm https://repo.zabbix.com/zabbix/%{main_version}/rhel/%{?rhel}/SRPMS/zabbix-%{main_version}.%{minor_version}-1.el%{?rhel}.src.rpm
+rpm -i /tmp/zbx.rpm
+%setup -qTcn zabbix-%{main_version}.%{minor_version}
+tar --strip-components=1 -xf %{_topdir}/SOURCES/zabbix-%{main_version}.%{minor_version}.tar.gz
+echo 'LoadModule=%{name}.so' > %{_topdir}/SOURCES/%{name}.conf
+cp -r %{_topdir}/BUILD/%{name}- %{_topdir}/BUILD/zabbix-%{main_version}.%{minor_version}/src/modules
+
+%build
+./configure
+cd src/modules/%{name}-
+./autogen.sh
+%configure --with-zabbix=%{_topdir}/BUILD/zabbix-%{main_version}.%{minor_version}
+make
+
+%install
+install --directory %{buildroot}%{_libdir}/zabbix/modules/
+install --directory %{buildroot}/etc/zabbix/zabbix_agentd.d/
+
+install -m 0755 %{_topdir}/BUILD/zabbix-%{main_version}.%{minor_version}/%{module_dir}/%{name}-/src/.libs/%{name}.so %{buildroot}%{_libdir}/zabbix/modules/
+install -m 0644 %{_topdir}/BUILD/zabbix-%{main_version}.%{minor_version}/src/modules/%{name}-/conf/%{name}.conf %{buildroot}/etc/zabbix/
+install -m 0644 %{_topdir}/SOURCES/%{name}.conf %{buildroot}/etc/zabbix/zabbix_agentd.d/
+
+%clean
+rm -rf %{buildroot}
+
+%files
+/%{_libdir}/zabbix/modules/
+/etc/zabbix/%{name}.conf
+/etc/zabbix/zabbix_agentd.d/%{name}.conf
+
+%post
+/usr/bin/systemctl try-restart zabbix-agent.service >/dev/null 2>&1 || :
+
+%postun
+/usr/bin/systemctl try-restart zabbix-agent.service >/dev/null 2>&1 || :
+
+%changelog
+{{{ git_changelog }}}

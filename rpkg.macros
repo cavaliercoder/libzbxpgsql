@@ -1,0 +1,14 @@
+function git_commits_no {
+               total_commits="$(git rev-list --all --count)"
+               echo -n "$total_commits"
+           }
+
+function git_tag_last {
+                tag_last="$(git describe --abbrev=0 | tr -d v)"
+                echo -n "$tag_last"
+           }
+
+function git_commits_since_last_tag_add1 {
+                commits_since_since_last_tag="$(expr $(git rev-list  `git rev-list --tags --no-walk --max-count=1`..HEAD --count) \+ \1)"
+                echo -n $commits_since_since_last_tag
+           }

@@ -43,3 +43,4 @@ src/**/Makefile
 stamp-h1
 zabbix-*/
 zabbix_agent_bench
+.idea/
